@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signature ProsperPlan</title>
+<style>
+body { font-family: Arial, sans-serif; background: #fff; padding: 20px; }
+label { display: block; font-size: 13px; font-weight: bold; margin-top: 8px; }
+input[type="text"] { width: 100%; padding: 6px; margin-top: 2px; font-size: 14px; box-sizing: border-box; }
+button { padding: 8px 14px; font-size: 14px; cursor: pointer; margin-right: 6px; margin-top: 12px; }
+#output-box { display: none; margin-top: 16px; }
+#output-box textarea { width: 100%; height: 180px; font-size: 11px; font-family: monospace; resize: vertical; }
+hr { margin: 20px 0; }
+.preview-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<h2>ProsperPlan Signature Generator</h2>
+
+<label>Name</label>
+<input type="text" id="name" value="Chris Grellas">
+
+<label>Certification</label>
+<input type="text" id="certification" value="CFP®, MSFA">
+
+<label>Title</label>
+<input type="text" id="title" value="Co-Founder and Financial Advisor">
+
+<label>Phone</label>
+<input type="text" id="phone" value="916-909-3993">
+
+<label>Email username (before @prosperplan.com)</label>
+<input type="text" id="emailUser" value="chris">
+
+<label>Meeting link URL</label>
+<input type="text" id="meetingLink" value="https://calendly.com/chrisgrellas">
+
+<label>Upload files link URL</label>
+<input type="text" id="uploadLink" value="https://prosperplan.app.box.com/f/dc66ed89b50a49f7a80f7f050490fc21">
+
+<label>Photo URL</label>
+<input type="text" id="photoUrl" value="https://raw.githubusercontent.com/ProsperPlan/signature-chris/main/Chris.png">
+
+<label>Banner URL (upload awards_banner_v3.png to your GitHub repo, then paste its raw URL)</label>
+<input type="text" id="bannerUrl" value="https://raw.githubusercontent.com/ProsperPlan/signature-chris/main/awards_banner_Chris.png">
+
+<label>Logo URL (upload prosperplan_logo_hd.png to your GitHub repo)</label>
+<input type="text" id="logoUrl" value="https://raw.githubusercontent.com/ProsperPlan/signature-chris/main/prosperplan_logo_hd.png">
+
+<label>Vertical line height (px) — adjust until it ends at the bottom of the Wealth logo</label>
+<input type="text" id="slashHeight" value="272">
+
+<label>Spacing between contact rows (px) — adjust until "Securely upload files" bottom-aligns with the line</label>
+<input type="text" id="rowSpacing" value="12">
+
+<br>
+<button onclick="refreshPreview()">Refresh Preview</button>
+<button onclick="copyHTMLForWealthbox()" style="background:#3d4f2f;color:white;border:none;">Copy HTML for Wealthbox</button>
+
+<hr>
+<p style="font-size:12px;color:#888;margin-bottom:6px;">Preview:</p>
+<div id="preview"></div>
+
+<div id="output-box">
+  <p style="font-size:13px;"><strong>Paste into Wealthbox → Settings → Email Signature → HTML editor:</strong></p>
+  <textarea id="html-out" readonly></textarea>
+  <br>
+  <button onclick="document.getElementById('html-out').select()">Select All</button>
+</div>
+
+<script>
+function row(iconUrl, contentHtml, spacingPx) {
+  return `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 ${spacingPx}px 0;padding:0;"><tr><td style="width:26px;padding:0 6px 0 0;margin:0;vertical-align:middle;line-height:1;"><img src="${iconUrl}" width="20" height="20" style="width:20px;height:20px;display:block;margin:0;padding:0;"></td><td style="padding:0;margin:0;vertical-align:middle;line-height:1;font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;">${contentHtml}</td></tr></table>`;
+}
+
+function buildSignatureHTML(name, cert, title, phone, emailUser, meetingLink, uploadLink, photoUrl, slashHeight, rowSpacing, bannerUrl, logoUrl) {
+  const email = emailUser ? emailUser + "@prosperplan.com" : "";
+  const certText = cert ? ", " + cert : "";
+  const photoSrc = photoUrl || "https://via.placeholder.com/156x210";
+  const sh = parseInt(slashHeight) || 285;
+  const rs = parseInt(rowSpacing) || 14;
+
+  const iconBase = "https://raw.githubusercontent.com/lekterdead-design/web/refs/heads/main/";
+
+  const infoCol = `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0 0 0 0;padding:0;"><tr><td style="padding:0 0 2px 0;margin:0;line-height:1.2;font-family:Arial,sans-serif;font-size:26px;font-weight:bold;color:#3d4f2f;">${name}<span style="font-size:20px;font-weight:bold;">${certText}</span></td></tr><tr><td style="padding:0 0 14px 2px;margin:0;line-height:1;font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;">${title}</td></tr><tr><td style="padding:0;margin:0;line-height:1;">
+${row(iconBase+'location.png', `<span style="font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;line-height:1.4;display:inline;">2377 Gold Meadow Way, Suite 100<br>Gold River, CA 95670</span>`, rs)}
+${row(iconBase+'phone.png', `<span style="font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;line-height:1;">${phone}</span>`, rs)}
+${row(iconBase+'mail.png', `<a href="mailto:${email}" style="font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;text-decoration:underline;line-height:1;">${email}</a>`, rs)}
+${row(iconBase+'webpage.png', `<a href="https://prosperplan.com" style="font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;text-decoration:underline;line-height:1;">prosperplan.com</a>`, rs)}
+${row(iconBase+'calendar.png', `<a href="${meetingLink}" style="font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;text-decoration:underline;line-height:1;">Schedule a meeting with me!</a>`, rs)}
+${row(iconBase+'files.png', `<a href="${uploadLink}" style="font-family:Arial,sans-serif;font-size:16px;color:#4a5a3c;text-decoration:underline;line-height:1;">Securely upload files</a>`, 0)}
+</td></tr></table>`;
+
+  return `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-family:Arial,sans-serif;color:#4a5a3c;width:680px;margin:0;padding:0;">
+<tr>
+<td valign="top" align="center" style="width:240px;padding:0 8px 0 0;margin:0;vertical-align:top;border-collapse:collapse;">
+<img src="${photoSrc}" width="156" style="width:156px;height:auto;display:block;margin:0 auto 12px auto;padding:0;">
+<img src="${logoUrl}" width="225" style="width:225px;display:block;margin:0 auto;padding:0;">
+</td>
+<td valign="top" style="width:12px;padding:0 4px 0 0;margin:0;vertical-align:top;border-collapse:collapse;">
+<img src="${iconBase}slash.png" height="${sh}" style="height:${sh}px;display:block;padding:0;margin:0;">
+</td>
+<td valign="top" style="padding:0;margin:0;vertical-align:top;border-collapse:collapse;line-height:1;">
+<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:0;padding:0;"><tr><td style="padding:0;margin:0;vertical-align:top;line-height:1;">${infoCol}</td></tr></table>
+</td>
+</tr>
+<tr>
+<td colspan="3" style="padding:12px 0 0 0;margin:0;line-height:1;border-collapse:collapse;">
+<img src="${bannerUrl}" width="550" style="width:550px;max-width:100%;display:block;padding:0;margin:0;">
+</td>
+</tr>
+<tr>
+<td colspan="3" style="padding:8px 0 0 0;margin:0;border-collapse:collapse;">
+<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;width:550px;margin:0;padding:0;"><tr><td style="padding:0;margin:0;">
+<span style="font-family:Arial,sans-serif;font-size:9px;color:#B2BEB5;line-height:13px;display:block;">Advisory services offered through NewEdge Advisors, LLC, a registered investment adviser.</span>
+<span style="font-family:Arial,sans-serif;font-size:9px;color:#B2BEB5;line-height:13px;display:block;margin-top:6px;"><strong>Gold Financial Planner. Silver Wealth Management. 2025 Sacramento Favorites.</strong> Winner via public voting in 2025. No fee for consideration; licensing fee paid for usage. <a href="https://www.shopsacramentofavorites.com/official-rules" style="color:grey;">Learn more</a>.</span>
+<span style="font-family:Arial,sans-serif;font-size:9px;color:#B2BEB5;line-height:13px;display:block;margin-top:6px;"><strong>40 Under 40:</strong> Chris Grellas, CFP&#174;, MSFA &#8212; Sacramento Business Journal 40 Under 40, Class of 2026. Annual award by editorial staff. No fee for consideration, fee for digital mark usage. <a href="https://www.bizjournals.com/sacramento/nomination/89129/2026/2026-40-under-40#/" style="color:grey;">Learn more</a>.</span>
+<span style="font-family:Arial,sans-serif;font-size:9px;color:#B2BEB5;line-height:13px;display:block;margin-top:6px;"><strong>Barron&#39;s Advisor Top 100 RIA Firms 2025.</strong> Barron&#39;s rankings awarded to NewEdge Capital Group in September 2025 based on prior 12 month data. ProsperPlan Wealth is not an affiliated entity. <a href="https://www.newedgeadvisors.com/accolades/" style="color:grey;">Learn more</a>.</span>
+<span style="font-family:Arial,sans-serif;font-size:9px;color:#B2BEB5;line-height:13px;display:block;margin-top:10px;"><strong>NOTICE:</strong> This email communication including all attachments transmitted with it may contain confidential information intended solely for the use of the addressee. If the reader is not the intended recipient, please notify the sender immediately and delete this email. Unauthorized use, dissemination, distribution, or reproduction is strictly prohibited.</span>
+</td></tr></table>
+</td>
+</tr>
+</table>`;
+}
+
+function getValues() {
+  return {
+    name: document.getElementById("name").value.trim(),
+    cert: document.getElementById("certification").value.trim(),
+    title: document.getElementById("title").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    emailUser: document.getElementById("emailUser").value.trim(),
+    meetingLink: document.getElementById("meetingLink").value.trim(),
+    uploadLink: document.getElementById("uploadLink").value.trim(),
+    photoUrl: document.getElementById("photoUrl").value.trim(),
+    bannerUrl: document.getElementById("bannerUrl").value.trim(),
+    logoUrl: document.getElementById("logoUrl").value.trim(),
+    slashHeight: document.getElementById("slashHeight").value.trim(),
+    rowSpacing: document.getElementById("rowSpacing").value.trim()
+  };
+}
+
+function refreshPreview() {
+  const v = getValues();
+  document.getElementById("preview").innerHTML = buildSignatureHTML(
+    v.name, v.cert, v.title, v.phone, v.emailUser, v.meetingLink, v.uploadLink, v.photoUrl, v.slashHeight, v.rowSpacing, v.bannerUrl, v.logoUrl
+  );
+}
+
+function copyHTMLForWealthbox() {
+  const v = getValues();
+  const html = buildSignatureHTML(
+    v.name, v.cert, v.title, v.phone, v.emailUser, v.meetingLink, v.uploadLink, v.photoUrl, v.slashHeight, v.rowSpacing, v.bannerUrl, v.logoUrl
+  );
+  const box = document.getElementById("output-box");
+  const ta = document.getElementById("html-out");
+  box.style.display = "block";
+  ta.value = html;
+  ta.select();
+  try {
+    document.execCommand("copy");
+    alert("HTML copied! Go to Wealthbox \u2192 Settings \u2192 Signature \u2192 HTML view \u2192 paste.");
+  } catch(e) {
+    alert("Auto-copy failed \u2014 click 'Select All' and copy manually.");
+  }
+}
+
+window.onload = function() { refreshPreview(); };
+</script>
+
+</body>
+</html>
